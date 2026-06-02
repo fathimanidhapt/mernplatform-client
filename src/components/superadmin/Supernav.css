@@ -1,0 +1,154 @@
+.supernav-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background-color: #e0ebff;
+    border-right: 1px solid #cbdffd;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 16px;
+    z-index: 1000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.supernav-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+.supernav-left {
+    width: 100%;
+    margin-bottom: 40px;
+    display: flex;
+}
+
+.supernav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0e1010;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.supernav-logo-icon {
+    font-size: 22px;
+    color: #0e1010;
+}
+
+.supernav-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.supernav-link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+    gap: 12px;
+}
+
+.supernav-link:hover {
+    color: #0b63e5;
+    background-color: rgba(11, 99, 229, 0.08);
+}
+
+.supernav-link.active {
+    color: #ffffff;
+    background-color: #0b63e5;
+}
+
+.nav-icon {
+    font-size: 18px;
+    margin-bottom: 0;
+}
+
+.nav-text {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.supernav-logout {
+    margin-left: 0;
+    border-left: none;
+    margin-top: auto;
+    border-top: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding-top: 16px;
+}
+
+.supernav-logout:hover {
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+.supernav-logout:hover .text-danger {
+    color: #dc2626;
+}
+
+.text-danger {
+    color: #ef4444;
+    transition: color 0.15s ease;
+}
+
+@media (max-width: 768px) {
+    .supernav-header {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #cbdffd;
+        padding: 12px 16px;
+    }
+
+    .supernav-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .supernav-left {
+        width: auto;
+        margin-bottom: 0;
+    }
+
+    .supernav-right {
+        flex-direction: row;
+        width: auto;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .supernav-link {
+        width: auto;
+        padding: 6px 12px;
+    }
+
+    .supernav-logout {
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+    }
+}
