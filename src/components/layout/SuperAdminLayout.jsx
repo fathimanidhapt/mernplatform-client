@@ -1,5 +1,5 @@
 import React from "react";
-import Supernav from "../superadmin/supernav";
+import Supernav from "../superadmin/Supernav";
 import "./SuperAdminLayout.css";
 
 const SuperAdminLayout = ({ children }) => {

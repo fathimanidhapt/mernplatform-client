@@ -1,5 +1,5 @@
 import React from "react";
-import "./SuperLayout.css";
+import "./Supernav.css";
 import { IoPeople, IoShield, IoBarChart, IoLogOutOutline, IoKeyOutline, IoDocumentText } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
