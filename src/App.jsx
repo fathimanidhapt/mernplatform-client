@@ -16,12 +16,13 @@ import ManageUsers from "./pages/superadmin/ManageUsers";
 import ManageAdmins from "./pages/superadmin/ManageAdmins";
 import Stats from "./pages/superadmin/Stats";
 import ManagePosts from "./pages/superadmin/ManagePosts";
+import SuperAdminLogin from "./pages/superadmin/SuperAdminLogin";
 const App = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Signpage />} />
-        <Route path="/Login" element={<Login />} />
+        <Route path="/Sign" element={<Signpage />} />
+        <Route path="/" element={<Login />} />
         <Route path="/Home" element={<Homefeed />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/create-post" element={<Post />} />
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/admin/users" element={<Viewuser />} />
         <Route path="/admin/posts" element={<Viewpost />} />
+        <Route path="/superadmin/login" element={<SuperAdminLogin />} />
         <Route path="/superadmin/users" element={<ManageUsers />} />
         <Route path="/superadmin/admins" element={<ManageAdmins />} />
         <Route path="/superadmin/posts" element={<ManagePosts />} />

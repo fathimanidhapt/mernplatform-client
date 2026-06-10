@@ -13,7 +13,7 @@ const Supernav = () => {
         localStorage.removeItem("profilePic");
         localStorage.removeItem("role");
         toast.success("Logged out successfully");
-        navigate("/Login");
+        navigate("/");
     };
 
     return (

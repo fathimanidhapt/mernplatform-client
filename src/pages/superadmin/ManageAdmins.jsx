@@ -43,64 +43,7 @@ const ManageAdmins = () => {
         }
     }, [token]);
 
-    const handleEditUserRole = async (userId, name, currentRole) => {
-        Swal.fire({
-            title: "Edit User Role",
-            text: `Select a new role for ${name}:`,
-            input: "select",
-            inputOptions: {
-                user: "User",
-                admin: "Admin",
-                superadmin: "Super Admin"
-            },
-            inputValue: currentRole || "admin",
-            position: "top",
-            width: "280px",
-            showCancelButton: true,
-            confirmButtonText: "Save",
-            cancelButtonText: "Cancel",
-            background: "#ffffff",
-            color: "#1e293b",
-            customClass: {
-                popup: "admin-swal-popup",
-                title: "admin-swal-title",
-                htmlContainer: "admin-swal-html",
-                confirmButton: "admin-swal-confirm",
-                cancelButton: "admin-swal-cancel"
-            },
-            buttonsStyling: false
-        }).then(async (result) => {
-            if (result.isConfirmed && result.value) {
-                const selectedRole = result.value;
-                try {
-                    await axios.put(`http://localhost:3000/api/superadmin/users/${userId}/role`,
-                        { role: selectedRole },
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    Swal.fire({
-                        title: "Role Updated",
-                        text: `${name}'s role is now ${selectedRole}.`,
-                        position: "top",
-                        width: "280px",
-                        confirmButtonText: "OK",
-                        background: "#ffffff",
-                        color: "#1e293b",
-                        customClass: {
-                            popup: "admin-swal-popup",
-                            title: "admin-swal-title",
-                            htmlContainer: "admin-swal-html",
-                            confirmButton: "admin-swal-confirm"
-                        },
-                        buttonsStyling: false
-                    });
-                    fetchUsers();
-                } catch (error) {
-                    console.error("Error updating user role:", error);
-                    toast.error("Failed to update user role");
-                }
-            }
-        });
-    };
+
 
     const handleDeleteAdmin = async (userId, name) => {
         Swal.fire({
@@ -153,44 +96,26 @@ const ManageAdmins = () => {
     };
 
     const handleAddAdmin = () => {
-        const standardUsersList = users.filter(u => u.role === "user");
-
-        if (standardUsersList.length === 0) {
-            Swal.fire({
-                title: "No users available",
-                text: "There are no standard users to promote to Admin.",
-                position: "top",
-                width: "280px",
-                confirmButtonText: "OK",
-                background: "#ffffff",
-                color: "#1e293b",
-                customClass: {
-                    popup: "admin-swal-popup",
-                    title: "admin-swal-title",
-                    htmlContainer: "admin-swal-html",
-                    confirmButton: "admin-swal-confirm"
-                },
-                buttonsStyling: false
-            });
-            return;
-        }
-
-        const options = {};
-        standardUsersList.forEach(u => {
-            options[u._id] = `${u.name} (${u.email})`;
-        });
-
         Swal.fire({
-            title: "Add Administrator",
-            text: "Select a user to promote to Admin:",
-            input: "select",
-            inputOptions: options,
-            inputPlaceholder: "Choose a user...",
-            position: "top",
-            width: "280px",
+            title: "Create Administrator",
+            html: `
+                <div style="text-align: left; margin-top: 10px;">
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Name</label>
+                    <input id="swal-input-name" class="swal2-input" placeholder="Name" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                    
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Email Address</label>
+                    <input id="swal-input-email" type="email" class="swal2-input" placeholder="Email" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                    
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Password</label>
+                    <input id="swal-input-password" type="password" class="swal2-input" placeholder="Password" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                </div>
+            `,
+            focusConfirm: false,
             showCancelButton: true,
-            confirmButtonText: "Add Admin",
+            confirmButtonText: "Create Admin",
             cancelButtonText: "Cancel",
+            position: "top",
+            width: "350px",
             background: "#ffffff",
             color: "#1e293b",
             customClass: {
@@ -200,19 +125,38 @@ const ManageAdmins = () => {
                 confirmButton: "admin-swal-confirm",
                 cancelButton: "admin-swal-cancel"
             },
-            buttonsStyling: false
+            buttonsStyling: false,
+            preConfirm: () => {
+                const name = document.getElementById("swal-input-name").value;
+                const email = document.getElementById("swal-input-email").value;
+                const password = document.getElementById("swal-input-password").value;
+                
+                if (!name || !email || !password) {
+                    Swal.showValidationMessage("Please fill in all fields");
+                    return false;
+                }
+                if (password.length < 6) {
+                    Swal.showValidationMessage("Password must be at least 6 characters");
+                    return false;
+                }
+                const emailRegex = /^\S+@\S+\.\S+$/;
+                if (!emailRegex.test(email)) {
+                    Swal.showValidationMessage("Please enter a valid email address");
+                    return false;
+                }
+                return { name, email, password };
+            }
         }).then(async (result) => {
             if (result.isConfirmed && result.value) {
-                const userId = result.value;
-                const selectedUser = standardUsersList.find(u => u._id === userId);
+                const { name, email, password } = result.value;
                 try {
-                    await axios.put(`http://localhost:3000/api/superadmin/users/${userId}/role`,
-                        { role: "admin" },
+                    await axios.post("http://localhost:3000/api/superadmin/admins",
+                        { name, email, password },
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
                     Swal.fire({
-                        title: "Admin Added",
-                        text: `${selectedUser.name} has been promoted to Admin.`,
+                        title: "Admin Created",
+                        text: `${name} has been successfully created as an Admin.`,
                         position: "top",
                         width: "280px",
                         confirmButtonText: "OK",
@@ -228,8 +172,94 @@ const ManageAdmins = () => {
                     });
                     fetchUsers();
                 } catch (error) {
-                    console.error("Error adding admin:", error);
-                    toast.error("Failed to add admin");
+                    console.error("Error creating admin:", error);
+                    const errMsg = error.response?.data?.message || "Failed to create admin";
+                    toast.error(errMsg);
+                }
+            }
+        });
+    };
+
+    const handleEditAdmin = (adminUser) => {
+        Swal.fire({
+            title: "Edit Administrator",
+            html: `
+                <div style="text-align: left; margin-top: 10px;">
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Name</label>
+                    <input id="swal-input-name" class="swal2-input" placeholder="Name" value="${adminUser.name}" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                    
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Email Address</label>
+                    <input id="swal-input-email" type="email" class="swal2-input" placeholder="Email" value="${adminUser.email}" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                    
+                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">New Password (Optional)</label>
+                    <input id="swal-input-password" type="password" class="swal2-input" placeholder="Leave blank to keep current password" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Save Changes",
+            cancelButtonText: "Cancel",
+            position: "top",
+            width: "350px",
+            background: "#ffffff",
+            color: "#1e293b",
+            customClass: {
+                popup: "admin-swal-popup",
+                title: "admin-swal-title",
+                htmlContainer: "admin-swal-html",
+                confirmButton: "admin-swal-confirm",
+                cancelButton: "admin-swal-cancel"
+            },
+            buttonsStyling: false,
+            preConfirm: () => {
+                const name = document.getElementById("swal-input-name").value;
+                const email = document.getElementById("swal-input-email").value;
+                const password = document.getElementById("swal-input-password").value;
+                
+                if (!name || !email) {
+                    Swal.showValidationMessage("Name and Email are required");
+                    return false;
+                }
+                if (password && password.length < 6) {
+                    Swal.showValidationMessage("Password must be at least 6 characters");
+                    return false;
+                }
+                const emailRegex = /^\S+@\S+\.\S+$/;
+                if (!emailRegex.test(email)) {
+                    Swal.showValidationMessage("Please enter a valid email address");
+                    return false;
+                }
+                return { name, email, password };
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed && result.value) {
+                const { name, email, password } = result.value;
+                try {
+                    await axios.put(`http://localhost:3000/api/superadmin/admins/${adminUser._id}`,
+                        { name, email, password },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    Swal.fire({
+                        title: "Admin Updated",
+                        text: `${name} has been successfully updated.`,
+                        position: "top",
+                        width: "280px",
+                        confirmButtonText: "OK",
+                        background: "#ffffff",
+                        color: "#1e293b",
+                        customClass: {
+                            popup: "admin-swal-popup",
+                            title: "admin-swal-title",
+                            htmlContainer: "admin-swal-html",
+                            confirmButton: "admin-swal-confirm"
+                        },
+                        buttonsStyling: false
+                    });
+                    fetchUsers();
+                } catch (error) {
+                    console.error("Error updating admin:", error);
+                    const errMsg = error.response?.data?.message || "Failed to update admin";
+                    toast.error(errMsg);
                 }
             }
         });
@@ -273,9 +303,6 @@ const ManageAdmins = () => {
                                 <tr>
                                     <th>Admin Name</th>
                                     <th>Email Address</th>
-                                    <th>Headline</th>
-                                    <th>Location</th>
-                                    <th>Current Company</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -296,14 +323,11 @@ const ManageAdmins = () => {
                                                      </div>
                                                  </td>
                                                  <td>{user.email}</td>
-                                                 <td className="truncate-cell" title={user.headline}>{user.headline || "N/A"}</td>
-                                                 <td>{user.location || "N/A"}</td>
-                                                 <td>{user.company || "N/A"}</td>
                                                  <td>
                                                      <div className="action-buttons-group">
                                                          <button
                                                              className="action-btn promote-btn"
-                                                             onClick={() => handleEditUserRole(user._id, user.name, user.role)}
+                                                             onClick={() => handleEditAdmin(user)}
                                                          >
                                                              Edit
                                                          </button>
@@ -320,7 +344,7 @@ const ManageAdmins = () => {
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="no-data-cell">No registered administrators found.</td>
+                                        <td colSpan="3" className="no-data-cell">No registered administrators found.</td>
                                     </tr>
                                 )}
                             </tbody>
