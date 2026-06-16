@@ -15,8 +15,11 @@ const ManageAdmins = () => {
     const token = localStorage.getItem("token");
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
         const userRole = localStorage.getItem("role");
-        if (userRole !== "superadmin") {
+        if (!token) {
+            navigate("/");
+        } else if (userRole !== "superadmin") {
             toast.error("Access denied. Super Admins only.");
             navigate("/Home");
         }
@@ -180,93 +183,26 @@ const ManageAdmins = () => {
         });
     };
 
-    const handleEditAdmin = (adminUser) => {
-        Swal.fire({
-            title: "Edit Administrator",
-            html: `
-                <div style="text-align: left; margin-top: 10px;">
-                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Name</label>
-                    <input id="swal-input-name" class="swal2-input" placeholder="Name" value="${adminUser.name}" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
-                    
-                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">Email Address</label>
-                    <input id="swal-input-email" type="email" class="swal2-input" placeholder="Email" value="${adminUser.email}" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
-                    
-                    <label style="font-weight: 500; font-size: 14px; color: #1e293b; display: block; margin-bottom: 4px;">New Password (Optional)</label>
-                    <input id="swal-input-password" type="password" class="swal2-input" placeholder="Leave blank to keep current password" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; padding: 8px 12px; height: auto; font-size: 14px;">
-                </div>
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: "Save Changes",
-            cancelButtonText: "Cancel",
-            position: "top",
-            width: "350px",
-            background: "#ffffff",
-            color: "#1e293b",
-            customClass: {
-                popup: "admin-swal-popup",
-                title: "admin-swal-title",
-                htmlContainer: "admin-swal-html",
-                confirmButton: "admin-swal-confirm",
-                cancelButton: "admin-swal-cancel"
-            },
-            buttonsStyling: false,
-            preConfirm: () => {
-                const name = document.getElementById("swal-input-name").value;
-                const email = document.getElementById("swal-input-email").value;
-                const password = document.getElementById("swal-input-password").value;
-                
-                if (!name || !email) {
-                    Swal.showValidationMessage("Name and Email are required");
-                    return false;
-                }
-                if (password && password.length < 6) {
-                    Swal.showValidationMessage("Password must be at least 6 characters");
-                    return false;
-                }
-                const emailRegex = /^\S+@\S+\.\S+$/;
-                if (!emailRegex.test(email)) {
-                    Swal.showValidationMessage("Please enter a valid email address");
-                    return false;
-                }
-                return { name, email, password };
-            }
-        }).then(async (result) => {
-            if (result.isConfirmed && result.value) {
-                const { name, email, password } = result.value;
-                try {
-                    await axios.put(`http://localhost:3000/api/superadmin/admins/${adminUser._id}`,
-                        { name, email, password },
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    Swal.fire({
-                        title: "Admin Updated",
-                        text: `${name} has been successfully updated.`,
-                        position: "top",
-                        width: "280px",
-                        confirmButtonText: "OK",
-                        background: "#ffffff",
-                        color: "#1e293b",
-                        customClass: {
-                            popup: "admin-swal-popup",
-                            title: "admin-swal-title",
-                            htmlContainer: "admin-swal-html",
-                            confirmButton: "admin-swal-confirm"
-                        },
-                        buttonsStyling: false
-                    });
-                    fetchUsers();
-                } catch (error) {
-                    console.error("Error updating admin:", error);
-                    const errMsg = error.response?.data?.message || "Failed to update admin";
-                    toast.error(errMsg);
-                }
-            }
-        });
+
+
+    const handleRoleChange = async (userId, name, newRole) => {
+        try {
+            await axios.put(`http://localhost:3000/api/superadmin/users/${userId}/role`, {
+                role: newRole
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success(`Updated role for ${name} to ${newRole} ✅`);
+            fetchUsers();
+        } catch (error) {
+            console.error("Error updating user role:", error);
+            const errMsg = error.response?.data?.message || "Failed to update user role";
+            toast.error(errMsg);
+        }
     };
 
-    const administrators = users.filter(user =>
-        user.role === "admin" &&
+    const filteredUsers = users.filter(user =>
+        user.role !== "superadmin" &&
         (user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.email.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -274,12 +210,12 @@ const ManageAdmins = () => {
     return (
         <SuperAdminLayout>
             <div className="super-header-section">
-                <h1 className="super-page-title">Manage Admin</h1>
+                <h1 className="super-page-title">Manage User Roles</h1>
                 <div className="super-header-actions">
                     <div className="super-search-wrapper">
                         <input
                             type="text"
-                            placeholder="Search administrators by name or email..."
+                            placeholder="Search users by name or email..."
                             className="super-search-input"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -301,21 +237,22 @@ const ManageAdmins = () => {
                         <table className="super-custom-table">
                             <thead>
                                 <tr>
-                                    <th>Admin Name</th>
+                                    <th>User Name</th>
                                     <th>Email Address</th>
+                                    <th>Role</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {administrators.length > 0 ? (
-                                    administrators.map((user) => {
-                                         const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "AD";
+                                {filteredUsers.length > 0 ? (
+                                    filteredUsers.map((user) => {
+                                         const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "US";
                                          return (
                                              <tr key={user._id}>
                                                  <td>
                                                      <div className="table-user-cell">
                                                          {user.profilePic ? (
-                                                             <img src={user.profilePic} alt="Admin Avatar" className="table-avatar" />
+                                                             <img src={user.profilePic} alt="User Avatar" className="table-avatar" />
                                                          ) : (
                                                              <div className="table-avatar-placeholder">{initials}</div>
                                                          )}
@@ -324,13 +261,28 @@ const ManageAdmins = () => {
                                                  </td>
                                                  <td>{user.email}</td>
                                                  <td>
+                                                     <select
+                                                         className="role-select-dropdown"
+                                                         value={user.role}
+                                                         onChange={(e) => handleRoleChange(user._id, user.name, e.target.value)}
+                                                         style={{
+                                                             padding: "6px 12px",
+                                                             borderRadius: "6px",
+                                                             border: "1px solid #cbd5e1",
+                                                             backgroundColor: "#ffffff",
+                                                             color: "#1e293b",
+                                                             fontSize: "13px",
+                                                             fontWeight: "600",
+                                                             outline: "none",
+                                                             cursor: "pointer"
+                                                         }}
+                                                     >
+                                                         <option value="user">User</option>
+                                                         <option value="admin">Admin</option>
+                                                     </select>
+                                                 </td>
+                                                 <td>
                                                      <div className="action-buttons-group">
-                                                         <button
-                                                             className="action-btn promote-btn"
-                                                             onClick={() => handleEditAdmin(user)}
-                                                         >
-                                                             Edit
-                                                         </button>
                                                          <button
                                                              className="action-btn delete-btn"
                                                              onClick={() => handleDeleteAdmin(user._id, user.name)}
@@ -344,7 +296,7 @@ const ManageAdmins = () => {
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan="3" className="no-data-cell">No registered administrators found.</td>
+                                        <td colSpan="4" className="no-data-cell">No registered users found.</td>
                                     </tr>
                                 )}
                             </tbody>

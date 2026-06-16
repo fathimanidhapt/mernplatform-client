@@ -13,8 +13,11 @@ const Viewuser = () => {
     const token = localStorage.getItem("token");
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
         const userRole = localStorage.getItem("role");
-        if (userRole !== "admin") {
+        if (!token) {
+            navigate("/");
+        } else if (userRole !== "admin") {
             toast.error("Access denied. Admins only.");
             navigate("/Home");
         }

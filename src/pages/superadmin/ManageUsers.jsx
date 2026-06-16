@@ -15,8 +15,11 @@ const ManageUsers = () => {
     const token = localStorage.getItem("token");
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
         const userRole = localStorage.getItem("role");
-        if (userRole !== "superadmin") {
+        if (!token) {
+            navigate("/");
+        } else if (userRole !== "superadmin") {
             toast.error("Access denied. Super Admins only.");
             navigate("/Home");
         }

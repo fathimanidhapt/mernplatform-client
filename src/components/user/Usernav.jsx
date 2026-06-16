@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Usernav.css";
-import { IoSearch, IoPeople, IoChatboxEllipses, IoNotifications, IoAddCircleOutline, IoPersonCircleOutline, IoLogOutOutline } from "react-icons/io5";
+import { IoSearch, IoPeople, IoChatboxEllipses, IoNotifications, IoAddCircleOutline, IoPersonCircleOutline, IoLogOutOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
 import { AiFillHome } from "react-icons/ai";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -14,6 +14,19 @@ const Usernav = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowSearchDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleSearchChange = async (e) => {
         const query = e.target.value;
@@ -62,8 +75,8 @@ const Usernav = () => {
     return (
         <header className="usernav-header">
             <div className="usernav-container">
-                <div className="usernav-left" onMouseLeave={() => setShowSearchDropdown(false)}>
-                    <div className="usernav-search-container">
+                <div className="usernav-left">
+                    <div className="usernav-search-container" ref={searchRef}>
                         <div className="usernav-search">
                             <IoSearch className="search-icon" />
                             <input
@@ -81,7 +94,15 @@ const Usernav = () => {
                                     const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "U";
                                     return (
                                         <div key={user._id} className="search-result-row">
-                                            <div className="search-result-left">
+                                            <div 
+                                                className="search-result-left"
+                                                onClick={() => {
+                                                    setSearchQuery(user.name);
+                                                    navigate(`/user/${user._id}`);
+                                                    setShowSearchDropdown(false);
+                                                }}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 {user.profilePic ? (
                                                     <img src={user.profilePic} alt="Avatar" className="search-result-avatar" />
                                                 ) : (

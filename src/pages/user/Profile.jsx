@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 import Userlayout from "../../components/layout/UserLayout";
 import "./Profile.css";
 import {
@@ -23,6 +24,7 @@ import {
 } from "react-icons/io5";
 
 const Profile = () => {
+    const { id } = useParams();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -49,7 +51,10 @@ const Profile = () => {
 
     const fetchProfile = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/api/user/profile", {
+            const profileUrl = id 
+                ? `http://localhost:3000/api/user/profile?userId=${id}` 
+                : "http://localhost:3000/api/user/profile";
+            const response = await axios.get(profileUrl, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -68,14 +73,20 @@ const Profile = () => {
                 dob: response.data.dob || ""
             });
 
-            const postsResponse = await axios.get("http://localhost:3000/api/posts/user", {
+            const postsUrl = id 
+                ? `http://localhost:3000/api/posts/user?userId=${id}` 
+                : "http://localhost:3000/api/posts/user";
+            const postsResponse = await axios.get(postsUrl, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             setPosts(postsResponse.data);
 
-            const connResponse = await axios.get("http://localhost:3000/api/connections", {
+            const connectionsUrl = id 
+                ? `http://localhost:3000/api/connections?userId=${id}` 
+                : "http://localhost:3000/api/connections";
+            const connResponse = await axios.get(connectionsUrl, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -95,7 +106,7 @@ const Profile = () => {
         } else {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -251,6 +262,7 @@ const Profile = () => {
     }
 
     const defaultInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : "P";
+    const isOwnProfile = !id || (user && user.email === localStorage.getItem("email"));
 
     return (
         <Userlayout>
@@ -259,7 +271,12 @@ const Profile = () => {
                     <div className="profile-header-banner"></div>
 
                     <div className="profile-avatar-section">
-                        <div className="profile-avatar-wrapper" onClick={handleAvatarClick} title="Click to upload profile photo">
+                        <div 
+                            className="profile-avatar-wrapper" 
+                            onClick={isOwnProfile ? handleAvatarClick : undefined} 
+                            style={{ cursor: isOwnProfile ? "pointer" : "default" }}
+                            title={isOwnProfile ? "Click to upload profile photo" : ""}
+                        >
                             {user?.profilePic ? (
                                 <img
                                     src={user.profilePic}
@@ -271,9 +288,11 @@ const Profile = () => {
                                     {defaultInitials}
                                 </div>
                             )}
-                            <div className="profile-avatar-overlay">
-                                <IoCameraOutline className="camera-upload-icon" />
-                            </div>
+                            {isOwnProfile && (
+                                <div className="profile-avatar-overlay">
+                                    <IoCameraOutline className="camera-upload-icon" />
+                                </div>
+                            )}
                         </div>
                         <input
                             type="file"
@@ -318,9 +337,11 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            <button className="profile-edit-btn" onClick={() => setIsEditing(true)}>
-                                Edit Profile Intro
-                            </button>
+                            {isOwnProfile && (
+                                <button className="profile-edit-btn" onClick={() => setIsEditing(true)}>
+                                    Edit Profile Intro
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <form onSubmit={handleSave} className="profile-edit-form">
@@ -461,9 +482,11 @@ const Profile = () => {
                     <div className="profile-section-card">
                         <div className="section-card-header">
                             <h3 className="section-card-title">Contact Information</h3>
-                            <button className="contact-edit-btn" onClick={() => setIsEditing(true)} title="Edit Contact Details">
-                                <IoCreateOutline />
-                            </button>
+                            {isOwnProfile && (
+                                <button className="contact-edit-btn" onClick={() => setIsEditing(true)} title="Edit Contact Details">
+                                    <IoCreateOutline />
+                                </button>
+                            )}
                         </div>
                         <div className="registered-details-list">
                             <div className="registered-detail-item">
@@ -565,13 +588,15 @@ const Profile = () => {
                                     {connections.length} {connections.length === 1 ? "connection" : "connections"}
                                 </span>
                             </div>
-                            <button
-                                className="create-post-trigger-btn"
-                                onClick={() => setIsCreatingPost(true)}
-                                title="Create a Post"
-                            >
-                                Create Post
-                            </button>
+                            {isOwnProfile && (
+                                <button
+                                    className="create-post-trigger-btn"
+                                    onClick={() => setIsCreatingPost(true)}
+                                    title="Create a Post"
+                                >
+                                    Create Post
+                                </button>
+                            )}
                         </div>
 
                         <div className="posts-list">

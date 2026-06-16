@@ -33,7 +33,7 @@ const Post = () => {
             } catch (error) {
                 console.error("Error fetching user data:", error);
                 toast.error("Failed to authenticate session. Redirecting to login...");
-                navigate("/Login");
+                navigate("/");
             } finally {
                 setLoading(false);
             }
@@ -42,7 +42,7 @@ const Post = () => {
         if (token) {
             fetchUserData();
         } else {
-            navigate("/Login");
+            navigate("/");
         }
     }, [token, navigate]);
 

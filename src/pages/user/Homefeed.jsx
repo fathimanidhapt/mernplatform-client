@@ -103,7 +103,7 @@ const Homefeed = () => {
         if (token) {
             fetchFeedData();
         } else {
-            navigate("/Login");
+            navigate("/");
         }
     }, [token, navigate]);
 
@@ -112,7 +112,7 @@ const Homefeed = () => {
             await axios.put(`http://localhost:3000/api/posts/${postId}/like`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             const postsResponse = await axios.get("http://localhost:3000/api/posts", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -237,46 +237,46 @@ const Homefeed = () => {
 
                                     return (
                                         <div key={post._id} className="feed-post-card">
-                                             <div className="feed-post-header">
-                                                 <div className="feed-post-header-left">
-                                                     {post.author?.profilePic ? (
-                                                         <img src={post.author.profilePic} alt="Author" className="feed-post-avatar" />
-                                                     ) : (
-                                                         <div className="feed-post-avatar-placeholder">{postAuthorInitials}</div>
-                                                     )}
-                                                     <div className="feed-post-author-details">
-                                                         <span className="feed-post-author-name">{post.author?.name}</span>
-                                                         <span className="feed-post-author-headline">{post.author?.headline || "Professional"}</span>
-                                                         <span className="feed-post-date">
-                                                             {new Date(post.createdAt).toLocaleDateString(undefined, {
-                                                                 month: "short",
-                                                                 day: "numeric",
-                                                                 hour: "2-digit",
-                                                                 minute: "2-digit"
-                                                             })}
-                                                         </span>
-                                                     </div>
-                                                 </div>
-                                                 {isAlreadyConnected ? (
-                                                     <button className="feed-connect-btn connected" disabled>
-                                                         Connected
-                                                     </button>
-                                                 ) : isSentPending ? (
-                                                     <button 
-                                                         className="feed-connect-btn pending"
-                                                         onClick={() => handleConnect(post.author?._id)}
-                                                     >
-                                                         Pending
-                                                     </button>
-                                                 ) : (
-                                                     <button 
-                                                         className="feed-connect-btn"
-                                                         onClick={() => handleConnect(post.author?._id)}
-                                                     >
-                                                         Connect
-                                                     </button>
-                                                 )}
-                                             </div>
+                                            <div className="feed-post-header">
+                                                <div className="feed-post-header-left">
+                                                    {post.author?.profilePic ? (
+                                                        <img src={post.author.profilePic} alt="Author" className="feed-post-avatar" />
+                                                    ) : (
+                                                        <div className="feed-post-avatar-placeholder">{postAuthorInitials}</div>
+                                                    )}
+                                                    <div className="feed-post-author-details">
+                                                        <span className="feed-post-author-name">{post.author?.name}</span>
+                                                        <span className="feed-post-author-headline">{post.author?.headline || "Professional"}</span>
+                                                        <span className="feed-post-date">
+                                                            {new Date(post.createdAt).toLocaleDateString(undefined, {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit"
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {isAlreadyConnected ? (
+                                                    <button className="feed-connect-btn connected" disabled>
+                                                        Connected
+                                                    </button>
+                                                ) : isSentPending ? (
+                                                    <button
+                                                        className="feed-connect-btn pending"
+                                                        onClick={() => handleConnect(post.author?._id)}
+                                                    >
+                                                        Pending
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="feed-connect-btn"
+                                                        onClick={() => handleConnect(post.author?._id)}
+                                                    >
+                                                        Connect
+                                                    </button>
+                                                )}
+                                            </div>
 
                                             <div className="feed-post-body">
                                                 <p className="feed-post-text">{post.content}</p>
@@ -295,7 +295,7 @@ const Homefeed = () => {
                                             </div>
 
                                             <div className="feed-post-actions">
-                                                <button 
+                                                <button
                                                     className={`feed-action-btn ${isLikedByMe ? "liked" : ""}`}
                                                     onClick={() => handleLike(post._id)}
                                                 >
@@ -324,8 +324,8 @@ const Homefeed = () => {
                                                                 onChange={(e) => handleCommentChange(post._id, e.target.value)}
                                                                 className="comment-text-input"
                                                             />
-                                                            <button 
-                                                                type="submit" 
+                                                            <button
+                                                                type="submit"
                                                                 disabled={!(commentInputs[post._id] || "").trim()}
                                                                 className="comment-submit-btn"
                                                             >

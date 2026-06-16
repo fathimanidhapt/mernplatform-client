@@ -26,6 +26,11 @@ const Signpage = () => {
             return;
         }
 
+        if (email && email.toLowerCase().trim() === "superadmin@gmail.com") {
+            toast.error("Invalid registration credentials ❌");
+            return;
+        }
+
         const userData = {
             name: name,
             email: email,
@@ -45,10 +50,11 @@ const Signpage = () => {
             setPassword('');
             setConfirmpassword('');
 
-            navigate("/Login");
+            navigate("/");
 
         } catch (error) {
-            toast.error("Signup failed ❌");
+            const errorMessage = error.response?.data?.message || "Signup failed ❌";
+            toast.error(errorMessage);
             console.log(error);
         }
     };
@@ -103,7 +109,7 @@ const Signpage = () => {
 
                             <p className="signup">
                                 Already have an account?
-                                <button className="button2" onClick={() => navigate("/Login")}>
+                                <button className="button2" onClick={() => navigate("/")}>
                                     Sign In
                                 </button>
                             </p>

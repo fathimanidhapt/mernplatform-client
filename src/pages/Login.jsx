@@ -34,11 +34,6 @@ const Loginpage = () => {
             console.log(response);
 
             if (response && response.token) {
-                if (response.userData.role === "superadmin") {
-                    toast.error("Access Denied: Please use the Super Admin login portal ❌");
-                    return;
-                }
-
                 localStorage.setItem("token", response.token);
                 localStorage.setItem("role", response.userData.role);
                 localStorage.setItem("name", response.userData.name);
@@ -50,7 +45,9 @@ const Loginpage = () => {
                 setEmail("");
                 setPassword("");
 
-                if (response.userData.role === "admin") {
+                if (response.userData.role === "superadmin") {
+                    navigate("/superadmin/users");
+                } else if (response.userData.role === "admin") {
                     navigate("/admin/users");
                 } else {
                     navigate("/Home");
@@ -64,10 +61,9 @@ const Loginpage = () => {
             }
 
         } catch (error) {
-
             console.log(error);
-
-            toast.error("Login failed ❌");
+            const errorMessage = error.response?.data?.message || "Login failed ❌";
+            toast.error(errorMessage);
         }
     };
 

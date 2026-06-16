@@ -50,10 +50,8 @@ const MainProvider = ({ children }) => {
             return res.data;
 
         } catch (error) {
-
             console.log(error);
-
-            toast.error("Login failed ❌");
+            throw error;
         }
     };
 
