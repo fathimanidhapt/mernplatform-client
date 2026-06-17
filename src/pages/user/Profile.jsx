@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import Userlayout from "../../components/layout/UserLayout";
 import "./Profile.css";
@@ -253,27 +254,47 @@ const Profile = () => {
     };
 
     const handleDeletePost = async (postId) => {
-        if (!window.confirm("Are you sure you want to delete this post?")) return;
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#0d9488",
+            cancelButtonColor: "#ef4444",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await axios.delete(`http://localhost:3000/api/posts/${postId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
 
-        try {
-            await axios.delete(`http://localhost:3000/api/posts/${postId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your post has been deleted.",
+                        icon: "success",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    const postsResponse = await axios.get("http://localhost:3000/api/posts/user", {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    setPosts(postsResponse.data);
+                } catch (error) {
+                    console.error("Error deleting post:", error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: error.response?.data?.message || "Failed to delete post",
+                        icon: "error"
+                    });
                 }
-            });
-
-            toast.success("Post deleted successfully");
-
-            const postsResponse = await axios.get("http://localhost:3000/api/posts/user", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setPosts(postsResponse.data);
-        } catch (error) {
-            console.error("Error deleting post:", error);
-            toast.error("Failed to delete post");
-        }
+            }
+        });
     };
 
     if (loading) {
