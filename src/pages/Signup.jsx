@@ -21,13 +21,33 @@ const Signpage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!agreed) {
-            toast.error("Please agree to the Terms & Conditions ❌");
+        if (!name.trim()) {
+            toast.error("Username is required ❌");
+            return;
+        }
+
+        if (!email.trim() || !email.includes('@')) {
+            toast.error("Valid email is required (must contain '@') ❌");
             return;
         }
 
         if (email && email.toLowerCase().trim() === "superadmin@gmail.com") {
             toast.error("Invalid registration credentials ❌");
+            return;
+        }
+
+        if (!password) {
+            toast.error("Password is required ❌");
+            return;
+        }
+
+        if (password !== confirmpassword) {
+            toast.error("Password and confirm password must match ❌");
+            return;
+        }
+
+        if (!agreed) {
+            toast.error("Please agree to the Terms & Conditions ❌");
             return;
         }
 
