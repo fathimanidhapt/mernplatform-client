@@ -39,6 +39,39 @@ const Viewpost = () => {
         }
     };
 
+    const handleViewImage = (base64Data) => {
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>View Post Media</title>
+                        <style>
+                            body {
+                                margin: 0;
+                                background-color: #0f172a;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                min-height: 100vh;
+                            }
+                            img {
+                                max-width: 100%;
+                                max-height: 100vh;
+                                object-fit: contain;
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${base64Data}" alt="Post Media" />
+                    </body>
+                </html>
+            `);
+            newWindow.document.close();
+        }
+    };
+
     useEffect(() => {
         if (token) {
             fetchPosts();
@@ -136,9 +169,13 @@ const Viewpost = () => {
                                                 <td className="truncate-post-cell" title={post.content}>{post.content}</td>
                                                 <td>
                                                     {post.image ? (
-                                                        <a href={post.image} target="_blank" rel="noopener noreferrer" className="table-image-link">
+                                                        <span
+                                                            onClick={() => handleViewImage(post.image)}
+                                                            className="table-image-link"
+                                                            style={{ cursor: "pointer" }}
+                                                        >
                                                             View Post
-                                                        </a>
+                                                        </span>
                                                     ) : (
                                                         <span className="no-media-label">No Attachment</span>
                                                     )}

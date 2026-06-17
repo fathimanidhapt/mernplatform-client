@@ -12,6 +12,8 @@ const Adminnav = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("profilePic");
         localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        localStorage.removeItem("email");
         toast.success("Logged out successfully");
         navigate("/");
     };

@@ -16,7 +16,7 @@
 
 .usernav-container {
     width: 100%;
-    max-width: 1128px;
+    max-width: 100%;
     padding: 0 24px;
     display: flex;
     justify-content: space-between;
@@ -28,8 +28,21 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-grow: 1;
-    max-width: 320px;
+}
+
+.usernav-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0d9488;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 8px;
+    user-select: none;
+}
+
+.usernav-right .usernav-search-container {
+    width: 260px;
+    margin-right: 16px;
 }
 
 .usernav-logo {
@@ -174,7 +187,15 @@
         max-width: 40px;
     }
 
+    .usernav-title {
+        display: none;
+    }
+
     .usernav-search {
+        display: none;
+    }
+
+    .usernav-right .usernav-search-container {
         display: none;
     }
 

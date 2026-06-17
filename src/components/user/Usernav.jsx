@@ -9,7 +9,17 @@ import { toast } from "react-toastify";
 const Usernav = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const profilePic = localStorage.getItem("profilePic") || "";
+    const [profilePic, setProfilePic] = useState(localStorage.getItem("profilePic") || "");
+
+    useEffect(() => {
+        const handleProfilePicUpdate = () => {
+            setProfilePic(localStorage.getItem("profilePic") || "");
+        };
+        window.addEventListener("profilePicUpdated", handleProfilePicUpdate);
+        return () => {
+            window.removeEventListener("profilePicUpdated", handleProfilePicUpdate);
+        };
+    }, []);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
@@ -68,6 +78,8 @@ const Usernav = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("profilePic");
         localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        localStorage.removeItem("email");
         toast.success("Logged out successfully");
         navigate("/");
     };
@@ -76,6 +88,15 @@ const Usernav = () => {
         <header className="usernav-header">
             <div className="usernav-container">
                 <div className="usernav-left">
+                    <div className="usernav-logo" onClick={() => navigate("/Home")}>
+                        M
+                    </div>
+                    <span className="usernav-title" onClick={() => navigate("/Home")}>
+                        MERN Platform
+                    </span>
+                </div>
+
+                <nav className="usernav-right">
                     <div className="usernav-search-container" ref={searchRef}>
                         <div className="usernav-search">
                             <IoSearch className="search-icon" />
@@ -94,7 +115,7 @@ const Usernav = () => {
                                     const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "U";
                                     return (
                                         <div key={user._id} className="search-result-row">
-                                            <div 
+                                            <div
                                                 className="search-result-left"
                                                 onClick={() => {
                                                     setSearchQuery(user.name);
@@ -131,9 +152,6 @@ const Usernav = () => {
                             </div>
                         )}
                     </div>
-                </div>
-
-                <nav className="usernav-right">
                     <div
                         className={`usernav-link ${location.pathname === "/Home" ? "active" : ""}`}
                         onClick={() => navigate("/Home")}

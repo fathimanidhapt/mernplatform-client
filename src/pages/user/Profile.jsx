@@ -53,8 +53,8 @@ const Profile = () => {
 
     const fetchProfile = async () => {
         try {
-            const profileUrl = id 
-                ? `http://localhost:3000/api/user/profile?userId=${id}` 
+            const profileUrl = id
+                ? `http://localhost:3000/api/user/profile?userId=${id}`
                 : "http://localhost:3000/api/user/profile";
             const response = await axios.get(profileUrl, {
                 headers: {
@@ -75,8 +75,8 @@ const Profile = () => {
                 dob: response.data.dob || ""
             });
 
-            const postsUrl = id 
-                ? `http://localhost:3000/api/posts/user?userId=${id}` 
+            const postsUrl = id
+                ? `http://localhost:3000/api/posts/user?userId=${id}`
                 : "http://localhost:3000/api/posts/user";
             const postsResponse = await axios.get(postsUrl, {
                 headers: {
@@ -85,8 +85,8 @@ const Profile = () => {
             });
             setPosts(postsResponse.data);
 
-            const connectionsUrl = id 
-                ? `http://localhost:3000/api/connections?userId=${id}` 
+            const connectionsUrl = id
+                ? `http://localhost:3000/api/connections?userId=${id}`
                 : "http://localhost:3000/api/connections";
             const connResponse = await axios.get(connectionsUrl, {
                 headers: {
@@ -127,7 +127,12 @@ const Profile = () => {
                 }
             });
             setUser(response.data);
-            localStorage.setItem("profilePic", response.data.profilePic || "");
+            try {
+                localStorage.setItem("profilePic", response.data.profilePic || "");
+                window.dispatchEvent(new Event("profilePicUpdated"));
+            } catch (storageError) {
+                console.warn("Could not save profile pic to local storage (quota exceeded):", storageError);
+            }
             setIsEditing(false);
             toast.success("Profile updated successfully");
         } catch (error) {
@@ -162,7 +167,12 @@ const Profile = () => {
             const newProfilePic = response.data.profilePic;
             setUser((prev) => ({ ...prev, profilePic: newProfilePic }));
             setFormData((prev) => ({ ...prev, profilePic: newProfilePic }));
-            localStorage.setItem("profilePic", newProfilePic);
+            try {
+                localStorage.setItem("profilePic", newProfilePic);
+                window.dispatchEvent(new Event("profilePicUpdated"));
+            } catch (storageError) {
+                console.warn("Could not save profile pic to local storage (quota exceeded):", storageError);
+            }
             toast.success("Profile picture updated");
         } catch (error) {
             console.error("Error uploading avatar:", error);
@@ -180,7 +190,7 @@ const Profile = () => {
         }
 
         const uploadData = new FormData();
-        uploadData.append("image", file); 
+        uploadData.append("image", file);
 
         setUploadingImage(true);
         try {
@@ -257,11 +267,19 @@ const Profile = () => {
         Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
-            icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0d9488",
             cancelButtonColor: "#ef4444",
-            confirmButtonText: "Yes, delete it!"
+            confirmButtonText: "Yes, delete",
+            cancelButtonText: "Cancel",
+            customClass: {
+                popup: "custom-swal-popup",
+                title: "custom-swal-title",
+                htmlContainer: "custom-swal-text",
+                actions: "custom-swal-actions",
+                confirmButton: "custom-swal-confirm-btn",
+                cancelButton: "custom-swal-cancel-btn"
+            }
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
@@ -272,11 +290,13 @@ const Profile = () => {
                     });
 
                     Swal.fire({
-                        title: "Deleted!",
-                        text: "Your post has been deleted.",
+                        toast: true,
+                        position: "top",
                         icon: "success",
+                        title: "Post deleted successfully",
+                        showConfirmButton: false,
                         timer: 2000,
-                        showConfirmButton: false
+                        timerProgressBar: true
                     });
 
                     const postsResponse = await axios.get("http://localhost:3000/api/posts/user", {
@@ -288,9 +308,13 @@ const Profile = () => {
                 } catch (error) {
                     console.error("Error deleting post:", error);
                     Swal.fire({
-                        title: "Error!",
-                        text: error.response?.data?.message || "Failed to delete post",
-                        icon: "error"
+                        toast: true,
+                        position: "top",
+                        icon: "error",
+                        title: error.response?.data?.message || "Failed to delete post",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
                     });
                 }
             }
@@ -317,9 +341,9 @@ const Profile = () => {
                     <div className="profile-header-banner"></div>
 
                     <div className="profile-avatar-section">
-                        <div 
-                            className="profile-avatar-wrapper" 
-                            onClick={isOwnProfile ? handleAvatarClick : undefined} 
+                        <div
+                            className="profile-avatar-wrapper"
+                            onClick={isOwnProfile ? handleAvatarClick : undefined}
                             style={{ cursor: isOwnProfile ? "pointer" : "default" }}
                             title={isOwnProfile ? "Click to upload profile photo" : ""}
                         >
@@ -652,10 +676,10 @@ const Profile = () => {
                                         <div className="post-card-header" style={{ justifyContent: "space-between", width: "100%" }}>
                                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                                 {user?.profilePic ? (
-                                                    <img 
-                                                        src={user.profilePic} 
-                                                        alt="Author" 
-                                                        className="post-author-avatar" 
+                                                    <img
+                                                        src={user.profilePic}
+                                                        alt="Author"
+                                                        className="post-author-avatar"
                                                     />
                                                 ) : (
                                                     <div className="post-author-avatar-placeholder">
@@ -668,7 +692,7 @@ const Profile = () => {
                                                 </div>
                                             </div>
                                             {isOwnProfile && (
-                                                <button 
+                                                <button
                                                     className="post-delete-btn"
                                                     onClick={() => handleDeletePost(post._id)}
                                                     title="Delete Post"
@@ -696,7 +720,7 @@ const Profile = () => {
                                             )}
                                         </div>
                                         <div className="post-card-actions">
-                                            <button 
+                                            <button
                                                 className={`post-action-btn ${post.likes?.includes(user?._id) ? "liked" : ""}`}
                                                 onClick={() => handleLikePost(post._id)}
                                             >
@@ -768,12 +792,12 @@ const Profile = () => {
                                 </div>
                             )}
 
-                            <input 
-                                type="file" 
-                                id="modal-post-image-input" 
-                                accept="image/*" 
-                                style={{ display: "none" }} 
-                                onChange={handleModalImageChange} 
+                            <input
+                                type="file"
+                                id="modal-post-image-input"
+                                accept="image/*"
+                                style={{ display: "none" }}
+                                onChange={handleModalImageChange}
                             />
 
                             <div className="post-modal-footer">
