@@ -20,7 +20,8 @@ import {
     IoSend,
     IoCreateOutline,
     IoImagesOutline,
-    IoCloseOutline
+    IoCloseOutline,
+    IoTrashOutline
 } from "react-icons/io5";
 
 const Profile = () => {
@@ -248,6 +249,30 @@ const Profile = () => {
         } catch (error) {
             console.error("Error liking post:", error);
             toast.error("Failed to update like status");
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            await axios.delete(`http://localhost:3000/api/posts/${postId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            toast.success("Post deleted successfully");
+
+            const postsResponse = await axios.get("http://localhost:3000/api/posts/user", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setPosts(postsResponse.data);
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            toast.error("Failed to delete post");
         }
     };
 
@@ -603,22 +628,45 @@ const Profile = () => {
                             {posts.length > 0 ? (
                                 posts.map((post) => (
                                     <div key={post._id} className="post-card">
-                                        <div className="post-card-header">
-                                            {user?.profilePic ? (
-                                                <img 
-                                                    src={user.profilePic} 
-                                                    alt="Author" 
-                                                    className="post-author-avatar" 
-                                                />
-                                            ) : (
-                                                <div className="post-author-avatar-placeholder">
-                                                    {defaultInitials}
+                                        <div className="post-card-header" style={{ justifyContent: "space-between", width: "100%" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                {user?.profilePic ? (
+                                                    <img 
+                                                        src={user.profilePic} 
+                                                        alt="Author" 
+                                                        className="post-author-avatar" 
+                                                    />
+                                                ) : (
+                                                    <div className="post-author-avatar-placeholder">
+                                                        {defaultInitials}
+                                                    </div>
+                                                )}
+                                                <div className="post-author-info">
+                                                    <span className="post-author-name">{user?.name}</span>
+                                                    <span className="post-author-headline">{user?.headline || "Professional"}</span>
                                                 </div>
-                                            )}
-                                            <div className="post-author-info">
-                                                <span className="post-author-name">{user?.name}</span>
-                                                <span className="post-author-headline">{user?.headline || "Professional"}</span>
                                             </div>
+                                            {isOwnProfile && (
+                                                <button 
+                                                    className="post-delete-btn"
+                                                    onClick={() => handleDeletePost(post._id)}
+                                                    title="Delete Post"
+                                                    style={{
+                                                        background: "transparent",
+                                                        border: "none",
+                                                        color: "#ef4444",
+                                                        cursor: "pointer",
+                                                        fontSize: "18px",
+                                                        padding: "4px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        transition: "color 0.2s ease"
+                                                    }}
+                                                >
+                                                    <IoTrashOutline />
+                                                </button>
+                                            )}
                                         </div>
                                         <div className="post-card-content">
                                             <p>{post.content}</p>
