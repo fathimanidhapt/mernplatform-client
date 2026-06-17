@@ -227,8 +227,8 @@ const Homefeed = () => {
 
                     <main className="feed-main-content">
                         <div className="feed-posts-wrapper">
-                            {posts.filter(post => post.author?._id !== user?._id && post.author?.role === "user").length > 0 ? (
-                                posts.filter(post => post.author?._id !== user?._id && post.author?.role === "user").map((post) => {
+                            {posts.filter(post => post.author?.role === "user").length > 0 ? (
+                                posts.filter(post => post.author?.role === "user").map((post) => {
                                     const postAuthorInitials = post.author?.name ? post.author.name.slice(0, 2).toUpperCase() : "U";
                                     const isLikedByMe = post.likes?.includes(user?._id);
 
@@ -257,7 +257,7 @@ const Homefeed = () => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                {isAlreadyConnected ? (
+                                                {post.author?._id === user?._id ? null : isAlreadyConnected ? (
                                                     <button className="feed-connect-btn connected" disabled>
                                                         Connected
                                                     </button>
